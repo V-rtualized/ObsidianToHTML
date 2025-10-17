@@ -14,14 +14,14 @@ struct Body {
 
 fn text_to_body(text: &str) -> Body {
     Body {
-        content: text.to_string(),
+        content: text.trim().to_string(),
     }
 }
 
 fn split_content(content: &str) -> (Option<Header>, Body) {
     if let Some((yaml_str, body_text)) = content
-        .strip_prefix("---")
-        .and_then(|rest| rest.split_once("---"))
+        .strip_prefix("---\n")
+        .and_then(|rest| rest.split_once("\n---\n"))
     {
         let header: Option<Header> = serde_yaml::from_str(yaml_str).ok();
         let body = text_to_body(body_text);
@@ -32,6 +32,23 @@ fn split_content(content: &str) -> (Option<Header>, Body) {
     let body = text_to_body(content);
 
     (None, body)
+}
+
+fn print_header_information(header: Header) {
+    if let Some(tags) = header.tags {
+        println!("Tags: {}", tags.join(", "));
+    }
+    if let Some(aliases) = header.aliases {
+        println!("Aliases: {}", aliases.join(", "));
+    }
+    if let Some(pronunciation) = header.pronunciation {
+        println!("Pronunciation: {}", pronunciation);
+    }
+}
+
+fn print_body_information(body: Body) {
+    println!("Lines in body: {}", body.content.lines().count());
+    println!("Characters in body: {}", body.content.len());
 }
 
 fn main() -> ExitCode {
@@ -57,25 +74,11 @@ fn main() -> ExitCode {
 
     let (header, body) = split_content(&content);
 
-    match header {
-        Some(header_data) => {
-            if let Some(tags) = header_data.tags {
-                println!("Tags: {}", tags.join(", "));
-            }
-            if let Some(aliases) = header_data.aliases {
-                println!("Aliases: {}", aliases.join(", "));
-            }
-            if let Some(pronunciation) = header_data.pronunciation {
-                println!("Pronunciation: {}", pronunciation);
-            }
-        }
-        None => {
-            println!("File has no header")
-        }
+    if let Some(header_data) = header {
+        print_header_information(header_data);
     }
 
-    println!("Lines in body: {}", body.content.lines().count());
-    println!("Characters in body: {}", body.content.len());
+    print_body_information(body);
 
     ExitCode::SUCCESS
 }
