@@ -5,5 +5,3 @@ This project is my way of teaching myself Rust. It converts my Obsidian markdown
 - Tests
 - Documentation Comments
 - Expand on README
-
-```
