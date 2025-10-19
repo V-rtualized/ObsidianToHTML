@@ -1,26 +1,19 @@
+use clap::Parser;
 use obsidian_to_html::*;
-use std::{env::args, fs, process::ExitCode};
+use std::fs;
 
-fn main() -> ExitCode {
-    let args: Vec<String> = args().collect();
-    let program_name = &args[0];
+#[derive(Parser, Debug)]
+#[command(name = "obsidian-to-html")]
+#[command(about = "Parse Obsidian markdown files", long_about = None)]
+struct Args {
+    /// Path to the Obsidian markdown file
+    file_name: String,
+}
 
-    if args.len() < 2 {
-        eprintln!("Usage: {} <file_name>", program_name);
-        return ExitCode::FAILURE;
-    }
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let args = Args::parse();
 
-    let file_name = &args[1];
-
-    let content = match fs::read_to_string(file_name) {
-        Ok(content) => content,
-        Err(e) => {
-            eprintln!("Failed to read file '{}': {}", file_name, e);
-            return ExitCode::FAILURE;
-        }
-    };
-
-    println!("File: {}", file_name);
+    let content = fs::read_to_string(&args.file_name)?;
 
     let (header, body) = split_content(&content);
 
@@ -30,5 +23,5 @@ fn main() -> ExitCode {
 
     print_body_information(&body);
 
-    ExitCode::SUCCESS
+    Ok(())
 }
