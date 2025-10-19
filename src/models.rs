@@ -7,6 +7,7 @@ pub struct Header {
     pub pronunciation: Option<String>,
 }
 
+#[derive(Debug, Clone)]
 pub struct Body {
     pub content: String,
 }
